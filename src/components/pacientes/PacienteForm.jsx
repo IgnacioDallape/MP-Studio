@@ -15,7 +15,6 @@ export default function PacienteForm({ onClose, paciente }) {
   const [saving, setSaving] = useState(false);
   const toast = useStore((s) => s.toast);
   const refresh = useStore((s) => s.refreshPacientes);
-  const openPaciente = useStore((s) => s.openPaciente);
 
   const set = (k) => (e) => setF((s) => ({ ...s, [k]: e.target.value }));
 
@@ -40,15 +39,11 @@ export default function PacienteForm({ onClose, paciente }) {
         await db.updatePaciente(paciente.id, payload);
         toast('Paciente actualizado', 'success');
       } else {
-        const created = await db.createPaciente(payload);
+        await db.createPaciente(payload);
         toast('Paciente creado', 'success');
-        await refresh();
-        onClose();
-        openPaciente(created.id);
-        return;
       }
       await refresh();
-      onClose();
+      onClose(); // vuelve a la lista de pacientes
     } catch (err) {
       toast('Error al guardar: ' + err.message, 'error');
     } finally {
