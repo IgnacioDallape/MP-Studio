@@ -1,0 +1,19 @@
+{
+  "name": "MP Studio — Fisioterapia Invasiva Ecoguiada",
+  "short_name": "MP Studio",
+  "description": "Gestión de pacientes, fichas clínicas, tratamientos y agenda para fisioterapia invasiva ecoguiada.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#F8F3E1",
+  "theme_color": "#41431B",
+  "lang": "es-AR",
+  "categories": ["medical", "health", "productivity"],
+  "icons": [
+    { "src": "/icon.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "any" },
+    { "src": "/icon-192.png", "type": "image/png", "sizes": "192x192", "purpose": "any" },
+    { "src": "/icon-512.png", "type": "image/png", "sizes": "512x512", "purpose": "any" },
+    { "src": "/icon-maskable-512.png", "type": "image/png", "sizes": "512x512", "purpose": "maskable" }
+  ]
+}

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect width="100" height="100" rx="18" fill="#41431B"/>
+  <text x="50" y="50" font-family="Georgia, 'Cormorant Garamond', serif" font-size="52" font-weight="600"
+        fill="#F8F3E1" text-anchor="middle" dominant-baseline="central">
+    <tspan>M</tspan>
+  </text>
+  <text x="62" y="66" font-family="Georgia, 'Cormorant Garamond', serif" font-size="52" font-weight="600"
+        fill="#AEB784" text-anchor="middle" dominant-baseline="central">P</text>
+  <line x1="72" y1="20" x2="34" y2="82" stroke="#E3DBBB" stroke-width="3" stroke-linecap="round"/>
+</svg>
