@@ -3,8 +3,9 @@ import { useStore } from '../../store/useStore.js';
 import * as db from '../../lib/db.js';
 import { hoyISO } from '../../lib/format.js';
 import { exportTratamientoPDF } from '../../lib/exportPDF.js';
+import { prepararEnvioWhatsApp } from '../../lib/whatsapp.js';
 import Attachments from '../Attachments.jsx';
-import { IcX, IcPdf, IcCheck } from '../icons.jsx';
+import { IcX, IcPdf, IcCheck, IcWhatsApp } from '../icons.jsx';
 
 export default function TratamientoForm({ paciente, onClose, onCreated }) {
   const toast = useStore((s) => s.toast);
@@ -20,28 +21,60 @@ export default function TratamientoForm({ paciente, onClose, onCreated }) {
 
   const set = (k) => (e) => setF((s) => ({ ...s, [k]: e.target.value }));
 
-  const guardar = async (conPDF) => {
+  const datosOk = () => {
     if (!f.tratamiento.trim() && !f.patologia.trim()) {
       toast('Indicá al menos la patología o el tratamiento realizado', 'error');
-      return;
+      return false;
     }
+    return true;
+  };
+
+  const crear = async () => db.createTratamiento({
+    paciente_id: paciente.id,
+    fecha: f.fecha || hoyISO(),
+    patologia: f.patologia.trim(),
+    tratamiento: f.tratamiento.trim(),
+    notas: f.notas.trim(),
+    imagenes: f.imagenes,
+  });
+
+  const guardar = async (conPDF) => {
+    if (!datosOk()) return;
     setSaving(true);
     try {
-      const creado = await db.createTratamiento({
-        paciente_id: paciente.id,
-        fecha: f.fecha || hoyISO(),
-        patologia: f.patologia.trim(),
-        tratamiento: f.tratamiento.trim(),
-        notas: f.notas.trim(),
-        imagenes: f.imagenes,
-      });
+      const creado = await crear();
       toast('Tratamiento guardado', 'success');
-      if (conPDF) {
-        await exportTratamientoPDF({ paciente, tratamiento: creado });
-      }
+      if (conPDF) await exportTratamientoPDF({ paciente, tratamiento: creado });
       onCreated?.();
     } catch (e) {
       toast('Error al guardar: ' + e.message, 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const guardarYEnviar = async () => {
+    if (!datosOk()) return;
+    if (!paciente.telefono) {
+      toast('El paciente no tiene teléfono cargado. Editá sus datos primero.', 'error');
+      return;
+    }
+    const win = window.open('', '_blank'); // abrir dentro del gesto del click
+    setSaving(true);
+    try {
+      const creado = await crear();
+      const { waUrl, downloaded } = await prepararEnvioWhatsApp({ paciente, tratamiento: creado });
+      if (win) win.location.href = waUrl; else window.location.href = waUrl;
+      toast(
+        downloaded
+          ? 'Guardado. PDF descargado y WhatsApp abierto (conectá Supabase para link directo).'
+          : 'Guardado y WhatsApp abierto con el informe ✓',
+        downloaded ? 'info' : 'success'
+      );
+      onCreated?.();
+    } catch (e) {
+      if (win) win.close();
+      toast('Error: ' + e.message, 'error');
     } finally {
       setSaving(false);
     }
@@ -90,8 +123,11 @@ export default function TratamientoForm({ paciente, onClose, onCreated }) {
             <button className="btn btn-outline" onClick={() => guardar(false)} disabled={saving}>
               <IcCheck width={16} /> Guardar
             </button>
-            <button className="btn btn-primary" onClick={() => guardar(true)} disabled={saving}>
-              <IcPdf width={16} /> {saving ? 'Procesando…' : 'Guardar y generar PDF'}
+            <button className="btn btn-outline" onClick={() => guardar(true)} disabled={saving}>
+              <IcPdf width={16} /> {saving ? 'Procesando…' : 'Guardar + PDF'}
+            </button>
+            <button className="btn btn-wa" onClick={guardarYEnviar} disabled={saving}>
+              <IcWhatsApp size={16} /> {saving ? 'Procesando…' : 'Guardar y enviar por WhatsApp'}
             </button>
           </div>
         </div>

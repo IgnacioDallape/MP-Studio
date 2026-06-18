@@ -121,7 +121,15 @@ function paragraph(doc, y, text) {
   return y + lines.length * 5.4 + 4;
 }
 
-export async function exportTratamientoPDF({ paciente, tratamiento }) {
+function nombreArchivo(paciente, tratamiento) {
+  const n = `Informe_${(paciente.apellido || '')}_${(paciente.nombre || '')}_${tratamiento.fecha || ''}`
+    .replace(/\s+/g, '-')
+    .replace(/[^\w\-]/g, '');
+  return `${n || 'informe'}.pdf`;
+}
+
+// Construye el PDF y devuelve { doc, filename } sin descargarlo.
+async function buildTratamientoPDF({ paciente, tratamiento }) {
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
 
   header(doc);
@@ -247,8 +255,17 @@ export async function exportTratamientoPDF({ paciente, tratamiento }) {
     if (col !== 0) { y = rowTop + rowH + gap; }
   }
 
-  const nombre = `Informe_${(paciente.apellido || '')}_${(paciente.nombre || '')}_${tratamiento.fecha || ''}`
-    .replace(/\s+/g, '-')
-    .replace(/[^\w\-]/g, '');
-  doc.save(`${nombre || 'informe'}.pdf`);
+  return { doc, filename: nombreArchivo(paciente, tratamiento) };
+}
+
+// Descarga el PDF (botón "PDF").
+export async function exportTratamientoPDF({ paciente, tratamiento }) {
+  const { doc, filename } = await buildTratamientoPDF({ paciente, tratamiento });
+  doc.save(filename);
+}
+
+// Devuelve el PDF como { blob, filename } (para enviar por WhatsApp / Storage).
+export async function getTratamientoPDFBlob({ paciente, tratamiento }) {
+  const { doc, filename } = await buildTratamientoPDF({ paciente, tratamiento });
+  return { blob: doc.output('blob'), filename };
 }

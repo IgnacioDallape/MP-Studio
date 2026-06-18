@@ -238,3 +238,17 @@ export async function uploadFile(file) {
   // Local: el data URL ES la url.
   return { name: file.name, type, url: dataUrl };
 }
+
+// Sube un PDF (Blob) a Storage y devuelve su URL pública.
+// En modo local devuelve null (no hay donde hostearlo para compartir).
+export async function uploadPdf(blob, filename = 'informe.pdf') {
+  if (!isCloud) return null;
+  const safe = String(filename).replace(/[^\w.\-]/g, '_');
+  const path = `informes/${nowISO().slice(0, 10)}/${uid()}_${safe}`;
+  const { error } = await sb.storage
+    .from(STORAGE_BUCKET)
+    .upload(path, blob, { contentType: 'application/pdf', upsert: false });
+  if (error) throw error;
+  const { data } = sb.storage.from(STORAGE_BUCKET).getPublicUrl(path);
+  return data.publicUrl;
+}

@@ -3,7 +3,8 @@ import { useStore } from '../../store/useStore.js';
 import * as db from '../../lib/db.js';
 import { fechaLarga } from '../../lib/format.js';
 import { exportTratamientoPDF } from '../../lib/exportPDF.js';
-import { IcPlus, IcPdf, IcTrash, IcActivity } from '../icons.jsx';
+import { prepararEnvioWhatsApp } from '../../lib/whatsapp.js';
+import { IcPlus, IcPdf, IcTrash, IcActivity, IcWhatsApp } from '../icons.jsx';
 import TratamientoForm from './TratamientoForm.jsx';
 
 export default function Sesiones({ paciente }) {
@@ -12,6 +13,7 @@ export default function Sesiones({ paciente }) {
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [generating, setGenerating] = useState(null);
+  const [sending, setSending] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -49,6 +51,30 @@ export default function Sesiones({ paciente }) {
     }
   };
 
+  const onWhatsApp = async (s) => {
+    if (!paciente.telefono) {
+      toast('El paciente no tiene teléfono cargado. Editá sus datos primero.', 'error');
+      return;
+    }
+    const win = window.open('', '_blank'); // abrir dentro del gesto del click
+    setSending(s.id);
+    try {
+      const { waUrl, downloaded } = await prepararEnvioWhatsApp({ paciente, tratamiento: s });
+      if (win) win.location.href = waUrl; else window.location.href = waUrl;
+      toast(
+        downloaded
+          ? 'PDF descargado y WhatsApp abierto. Conectá Supabase para enviarlo como link directo.'
+          : 'WhatsApp abierto con el informe ✓',
+        downloaded ? 'info' : 'success'
+      );
+    } catch (e) {
+      if (win) win.close();
+      toast(e.message, 'error');
+    } finally {
+      setSending(null);
+    }
+  };
+
   return (
     <div>
       <div className="spread mb">
@@ -78,6 +104,9 @@ export default function Sesiones({ paciente }) {
                 <div className="small muted">{fechaLarga(s.fecha)}</div>
               </div>
               <div className="row">
+                <button className="btn btn-wa btn-sm" onClick={() => onWhatsApp(s)} disabled={sending === s.id}>
+                  <IcWhatsApp size={15} /> {sending === s.id ? 'Enviando…' : 'WhatsApp'}
+                </button>
                 <button className="btn btn-outline btn-sm" onClick={() => onPDF(s)} disabled={generating === s.id}>
                   <IcPdf width={16} /> {generating === s.id ? 'Generando…' : 'PDF'}
                 </button>

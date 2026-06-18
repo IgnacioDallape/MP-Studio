@@ -3,7 +3,8 @@ import { useStore } from '../../store/useStore.js';
 import * as db from '../../lib/db.js';
 import { fechaLarga, nombreCompleto, iniciales } from '../../lib/format.js';
 import { exportTratamientoPDF } from '../../lib/exportPDF.js';
-import { IcPdf, IcHistory, IcSearch } from '../icons.jsx';
+import { prepararEnvioWhatsApp } from '../../lib/whatsapp.js';
+import { IcPdf, IcHistory, IcSearch, IcWhatsApp } from '../icons.jsx';
 
 export default function Historial() {
   const pacientes = useStore((s) => s.pacientes);
@@ -13,6 +14,7 @@ export default function Historial() {
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState('');
   const [gen, setGen] = useState(null);
+  const [sending, setSending] = useState(null);
 
   const pacMap = useMemo(() => {
     const m = {};
@@ -59,6 +61,24 @@ export default function Historial() {
       toast('Error al generar PDF: ' + e.message, 'error');
     } finally {
       setGen(null);
+    }
+  };
+
+  const onWhatsApp = async (s) => {
+    const p = pacMap[s.paciente_id];
+    if (!p) { toast('El paciente de esta sesión ya no existe', 'error'); return; }
+    if (!p.telefono) { toast('El paciente no tiene teléfono cargado', 'error'); return; }
+    const win = window.open('', '_blank');
+    setSending(s.id);
+    try {
+      const { waUrl, downloaded } = await prepararEnvioWhatsApp({ paciente: p, tratamiento: s });
+      if (win) win.location.href = waUrl; else window.location.href = waUrl;
+      toast(downloaded ? 'PDF descargado y WhatsApp abierto.' : 'WhatsApp abierto con el informe ✓', downloaded ? 'info' : 'success');
+    } catch (e) {
+      if (win) win.close();
+      toast(e.message, 'error');
+    } finally {
+      setSending(null);
     }
   };
 
@@ -112,9 +132,14 @@ export default function Historial() {
                     <div className="small muted">{fechaLarga(s.fecha)} · {s.patologia || 'Sin patología'}</div>
                   </div>
                 </div>
-                <button className="btn btn-outline btn-sm" onClick={() => onPDF(s)} disabled={!p || gen === s.id}>
-                  <IcPdf width={16} /> {gen === s.id ? 'Generando…' : 'PDF'}
-                </button>
+                <div className="row">
+                  <button className="btn btn-wa btn-sm" onClick={() => onWhatsApp(s)} disabled={!p || sending === s.id}>
+                    <IcWhatsApp size={15} /> {sending === s.id ? 'Enviando…' : 'WhatsApp'}
+                  </button>
+                  <button className="btn btn-outline btn-sm" onClick={() => onPDF(s)} disabled={!p || gen === s.id}>
+                    <IcPdf width={16} /> {gen === s.id ? 'Generando…' : 'PDF'}
+                  </button>
+                </div>
               </div>
               {s.tratamiento && <div style={{ marginTop: 8 }} className="small">{s.tratamiento}</div>}
               {(s.imagenes || []).length > 0 && (

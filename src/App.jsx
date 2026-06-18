@@ -32,7 +32,10 @@ export default function App() {
           <button className="menu-btn" onClick={() => setNavOpen(true)} aria-label="Menú">
             <IcMenu />
           </button>
-          <BrandMark variant="row" width={200} />
+          <div className="topbar-brand">
+            <BrandMark variant="mono" width={30} />
+            <span className="topbar-title">MP Studio</span>
+          </div>
         </div>
 
         {section === 'pacientes' && <Pacientes />}

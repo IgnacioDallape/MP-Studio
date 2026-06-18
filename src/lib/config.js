@@ -29,3 +29,11 @@ export const STUDIO = {
   mail: '',                        // ej: 'mpstudio@gmail.com'
   instagram: '',                   // ej: '@mp.studio'
 };
+
+// WhatsApp — para enviar el informe al teléfono del paciente.
+// waDialCode: código de país por defecto si el número guardado no lo trae.
+// waMobile9: en Argentina los celulares llevan un "9" después del 54.
+export const WHATSAPP = {
+  waDialCode: '54',
+  waMobile9: true,
+};
