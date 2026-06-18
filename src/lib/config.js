@@ -6,8 +6,8 @@
 // Las instrucciones para crear el proyecto + las tablas estan en README.md.
 // ============================================================================
 
-export const SUPABASE_URL = '';      // ej: 'https://xxxxx.supabase.co'
-export const SUPABASE_ANON_KEY = ''; // ej: 'eyJhbGci...'
+export const SUPABASE_URL = 'https://npelotjjbdxnugxbcvxx.supabase.co';
+export const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5wZWxvdGpqYmR4bnVneGJjdnh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE4MTAyMzgsImV4cCI6MjA5NzM4NjIzOH0.dS0fHAD7IiS3ELl7p10y8gfbnIgFPcOOJAjl_1i3nJQ';
 
 // PIN de acceso a la app. Marcos lo puede cambiar acá.
 // (Es una traba simple del lado del cliente, no encriptacion fuerte.)

@@ -1,7 +1,7 @@
 -- ============================================================================
--- MP Studio — setup de Supabase
+-- MP Studio — setup de Supabase (un solo paso)
 -- Pegá TODO esto en el SQL Editor de tu proyecto y ejecutá (Run).
--- Después creá el bucket de Storage (ver el final del archivo).
+-- Crea las 3 tablas + el bucket de Storage + los permisos. Listo.
 -- ============================================================================
 
 -- ---- TABLAS ----------------------------------------------------------------
@@ -56,13 +56,20 @@ create policy "acceso_total" on tratamientos for all using (true) with check (tr
 create policy "acceso_total" on turnos       for all using (true) with check (true);
 
 -- ---- STORAGE ---------------------------------------------------------------
--- 1) En el panel: Storage → New bucket → nombre "archivos" → marcá "Public bucket".
--- 2) Después ejecutá esto para permitir subir y leer archivos:
+-- Crea el bucket público "archivos" (imágenes de ecografía y PDFs) y sus permisos.
+-- (No hace falta crearlo a mano en el panel: se crea acá.)
+
+insert into storage.buckets (id, name, public)
+values ('archivos', 'archivos', true)
+on conflict (id) do update set public = true;
 
 drop policy if exists "subir_archivos" on storage.objects;
 drop policy if exists "leer_archivos" on storage.objects;
+drop policy if exists "actualizar_archivos" on storage.objects;
 
 create policy "subir_archivos" on storage.objects
   for insert with check (bucket_id = 'archivos');
 create policy "leer_archivos" on storage.objects
   for select using (bucket_id = 'archivos');
+create policy "actualizar_archivos" on storage.objects
+  for update using (bucket_id = 'archivos') with check (bucket_id = 'archivos');
