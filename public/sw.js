@@ -1,7 +1,7 @@
 // Service Worker — MP Studio PWA
 // Estrategia: network-first para navegación, cache-first para assets estáticos.
-const CACHE = 'mp-studio-v1';
-const APP_SHELL = ['/', '/index.html', '/manifest.webmanifest', '/icon.svg'];
+const CACHE = 'mp-studio-v2';
+const APP_SHELL = ['/', '/index.html', '/manifest.webmanifest', '/favicon.png', '/logo-dark.png', '/logo-light.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(

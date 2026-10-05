@@ -32,35 +32,36 @@ async function toDataURL(url) {
   });
 }
 
+// Logo oficial (crema) cargado una vez por exportación. Si falla, header usa texto.
+let _logoData = null;
+
 function header(doc) {
   // Banda olivo
   doc.setFillColor(...OLIVE);
   doc.rect(0, 0, PAGE_W, 34, 'F');
 
-  // Monograma M / P
-  doc.setTextColor(...CREAM);
-  doc.setFont('times', 'bold');
-  doc.setFontSize(30);
-  doc.text('M', MX, 23);
-  doc.text('P', MX + 13, 25);
+  if (_logoData) {
+    const props = doc.getImageProperties(_logoData);
+    const h = 22;
+    const w = (h * props.width) / props.height;
+    doc.addImage(_logoData, 'PNG', MX, (34 - h) / 2, w, h);
 
-  // aguja ecoguiada (diagonal salvia)
-  doc.setDrawColor(...SAGE);
-  doc.setLineWidth(0.7);
-  doc.line(MX + 26, 8, MX + 4, 28);
-
-  // Wordmark + tagline
-  doc.setFont('times', 'normal');
-  doc.setFontSize(17);
-  doc.setTextColor(...CREAM);
-  doc.text('MP Studio', MX + 36, 16);
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7.2);
-  doc.setTextColor(...BEIGE);
-  doc.setCharSpace(1.6);
-  doc.text('FISIOTERAPIA INVASIVA  ·  ECOGUIADA', MX + 36, 23);
-  doc.setCharSpace(0);
+    // Tagline a la derecha del logo
+    const tx = MX + w + 7;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.4);
+    doc.setTextColor(...BEIGE);
+    doc.setCharSpace(1.6);
+    doc.text('FISIOTERAPIA INVASIVA', tx, 15.5);
+    doc.text('ECOGUIADA', tx, 21.5);
+    doc.setCharSpace(0);
+  } else {
+    // Fallback si no se pudo cargar la imagen
+    doc.setTextColor(...CREAM);
+    doc.setFont('times', 'bold');
+    doc.setFontSize(20);
+    doc.text('MP Studio', MX, 21);
+  }
 }
 
 function footer(doc) {
@@ -131,6 +132,8 @@ function nombreArchivo(paciente, tratamiento) {
 // Construye el PDF y devuelve { doc, filename } sin descargarlo.
 async function buildTratamientoPDF({ paciente, tratamiento }) {
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+
+  try { _logoData = await toDataURL('/logo-light.png'); } catch { _logoData = null; }
 
   header(doc);
   footer(doc);

@@ -34,7 +34,6 @@ export default function App() {
           </button>
           <div className="topbar-brand">
             <BrandMark variant="mono" width={30} />
-            <span className="topbar-title">MP Studio</span>
           </div>
         </div>
 

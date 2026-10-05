@@ -28,7 +28,7 @@ export default function PinGate() {
     <div className="pin-screen">
       <div className="pin-card">
         <div style={{ display: 'flex', justifyContent: 'center' }}>
-          <BrandMark variant="full" width={190} />
+          <BrandMark variant="full" width={160} />
         </div>
         <p className="muted" style={{ marginTop: 4 }}>Ingresá tu PIN para continuar</p>
 

@@ -21,7 +21,7 @@ export default function Sidebar({ onNavigate }) {
   return (
     <aside className="sidebar">
       <div className="brand">
-        <BrandMark variant="full" width={170} color="#F8F3E1" accent="#AEB784" />
+        <BrandMark variant="full" tone="light" width={140} />
       </div>
 
       <nav className="nav">
